@@ -1,0 +1,11 @@
+.title{
+    color: #22c35e;
+    /* color: orangered; */
+}
+.Container{
+    position: absolute;
+    top: 0;
+    left: 0;
+  right: 0;
+  margin: auto;
+}

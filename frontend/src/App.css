@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Asap&family=Poppins&display=swap');
+
+.App{
+    min-height: 100vh;
+    /* display: flex; */
+    background-color:#eae6df;
+    
+}
+#header
+{
+    height: 185px;
+    background-color: #22c35e;
+    width: 100%;
+    position: relative;
+}

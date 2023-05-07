@@ -1,0 +1,16 @@
+#drawer-header
+{
+    height: 64px;
+    background-color: #00a884de;    
+    width: 100%;
+}
+.searchChats
+{    
+    overflow-y: scroll;
+
+}
+
+::-webkit-scrollbar 
+{
+    display: none;
+}
