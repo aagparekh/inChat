@@ -11,6 +11,7 @@ import {
   Box,
   Text,
   Center,
+  Avatar,
 } from "@chakra-ui/react";
 import "./SideDrawer.css";
 import { ArrowBackIcon, Search2Icon } from "@chakra-ui/icons";
@@ -46,6 +47,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       try {
         setLoading(true);
         const response = await fetch("/api/chat", {
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${User.token}`,
           },
@@ -77,6 +79,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       try {
         setLoading(true);
         await fetch(`/api/user?search=${inputValue}`, {
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${User.token}`,
           },
@@ -118,7 +121,29 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                 <DrawerHeader color={"white"}>Profile</DrawerHeader>
               </div>
 
-              <DrawerBody></DrawerBody>
+              <DrawerBody p={0}>
+                <Center
+                  p={3}
+                  w={"100%"}
+                  h={"250px"}
+                  backgroundColor={"#f0f2f5"}
+                >
+                  <Avatar
+                    width="180px"
+                    height="180px"
+                    name={User.name}
+                    src={User.pic}
+                  ></Avatar>
+                </Center>
+                <Box px={7} py={4} borderBottom={"2px"} borderBottomColor={"blackAlpha.300"}>
+                  <Text mb={4} color={"whatsapp.500"}>Your name</Text>
+                  <Text>{User.name}</Text>
+                </Box>
+                <Box px={7} py={4} borderBottom={"2px"} borderBottomColor={"blackAlpha.300"}>
+                  <Text mb={4} color={"whatsapp.500"}>Your email address</Text>
+                  <Text>{User.email}</Text>
+                </Box>
+              </DrawerBody>
             </DrawerContent>
           </Drawer>
         ) : (
@@ -180,13 +205,13 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                         );
                       })
                     ) : (
-                      <Center color={"blackAlpha.600"}>
+                      <Center h={"100%"} color={"blackAlpha.600"}>
                         No results found for '{inputValue}'
                       </Center>
                     )
                   ) : // console.log(CurrentUserChat))
                   CurrentUserChat.length === 0 ? (
-                    <Center color={"blackAlpha.600"}>
+                    <Center h={"100%"} color={"blackAlpha.600"}>
                       Create or make new chats...
                     </Center>
                   ) : (
