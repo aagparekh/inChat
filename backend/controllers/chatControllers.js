@@ -70,7 +70,10 @@ const fetchChats = expressAsyncHandler(async (req, res) => {
           path: "lastestMessage.sender",
           select: "name email pic",
         });
-        res.status(200).send(results);
+        
+        
+         return res.status(200).send(results);
+        
       });
   } catch (error) {
     res.status(400);
