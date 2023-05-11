@@ -12,21 +12,24 @@ import {
   Text,
   Center,
   Avatar,
+  useToast,
 } from "@chakra-ui/react";
 import "./SideDrawer.css";
 import { ArrowBackIcon, Search2Icon } from "@chakra-ui/icons";
 import ChatLoading from "../ChatLoading";
 import { ChatState } from "../../../context/ChatProvider";
 import UserList from "../UserList/UserList";
+
 const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
   // const {onClose } = useDisclosure()
   const [isFocus, setisFocus] = useState(false);
   // const inputRef = useRef();
   const [inputValue, setInputValue] = useState();
   const [Loading, setLoading] = useState(false);
-  const [CurrentUserChat, setCurrentUserChat] = useState([]);
   const [SearchedUser, setSearchedUser] = useState([]);
-  const { User } = ChatState();
+  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat } = ChatState();
+  const [FetchAgain, setFetchAgain] = useState(false)
+  const toast = useToast();
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
@@ -61,18 +64,18 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
         console.log(data);
         setLoading(false);
         setCurrentUserChat(data);
+        
       } catch (error) {
         // Handle error here
         console.error(error);
       }
     };
     fetchUser();
-
     // Cleanup function
     return () => {
       // Cancel any ongoing requests here
     };
-  }, [User.token]);
+  }, [FetchAgain]);
 
   useEffect(() => {
     const SearchUser = async () => {
@@ -106,7 +109,42 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
     return () => {};
   }, [inputValue]);
 
-  const accessChat = (userId) => {};
+  const accessChat = async(userId) => {
+    // console.log(userId);
+    
+    try {
+    const jsonUserId = JSON.stringify({userId});
+    // console.log(jsonUserId);
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${User.token}`,
+      },
+      body: jsonUserId
+    });
+    const data = await response.json();
+    setSelectedChat(data);
+    // if(!CurrentUserChat.find((c)=>c._id == data._id))
+    // {
+    //   setCurrentUserChat([data,...CurrentUserChat]);
+    // }
+    setFetchAgain(!FetchAgain);
+    setSearchedUser();
+    setInputValue();
+    onClose();
+    toast({
+      title: 'Chat created.',
+      description: "Enjoy Chatting!!",
+      status: 'success',
+      duration: 4000,
+      isClosable: true,
+      position: 'top',
+    })
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <>
@@ -190,17 +228,20 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                     ></Input>
                   </InputGroup>
                 </Box>
-                <Box className="searchChats" h={"87%"} w={"100%"} mt={3}>
+                <Box className="searchChats" h={"87%"} w={"100%"}>
                   {Loading ? (
                     <ChatLoading />
                   ) : SearchedUser ? (
                     SearchedUser.length > 0 ? (
                       SearchedUser?.map((userChat) => {
+                        
                         return (
                           <UserList
                             key={userChat._id}
                             chat={userChat}
-                            openChat={() => accessChat(userChat._id)}
+                            openChat={() => { 
+                               
+                               accessChat(userChat._id)}}
                           />
                         );
                       })
@@ -221,7 +262,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                         <UserList
                           key={chat._id}
                           chat={chat}
-                          openChat={() => accessChat(chat._id)}
+                          openChat={() => accessChat(chat.users[1]._id)}
                         />
                       );
                     })

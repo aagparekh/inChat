@@ -1,7 +1,10 @@
 import { Avatar, Box, HStack, Heading, Square, Text } from "@chakra-ui/react";
 import React from "react";
+import { getSenderName, getSenderPic } from "../../../config/ChatSender";
+import { ChatState } from "../../../context/ChatProvider";
 
 const chatList = ({ chat, openChat }) => {
+  const {User,SelectedChat,setSelectedChat} = ChatState();
   return (
     <>
       <HStack
@@ -9,6 +12,7 @@ const chatList = ({ chat, openChat }) => {
         _hover={{ backgroundColor: "#f0f2f5" }}
         onClick={openChat}
         cursor={"pointer"}
+        backgroundColor={SelectedChat._id === chat._id? "#f0f2f5" : "transparent" }
       >
         {chat.isGroupChat ? (
           <>
@@ -36,7 +40,7 @@ const chatList = ({ chat, openChat }) => {
               size={"md"}
               cursor={"pointer"}
               name={"Aagam Parekh"}
-              src={chat.pic?chat.pic:chat.users[1].pic }
+              src={chat.pic?chat.pic: getSenderPic(User,chat.users) }
             ></Avatar>
             <Box
               p={2}
@@ -44,7 +48,7 @@ const chatList = ({ chat, openChat }) => {
               borderBottom={"2px"}
               borderBottomColor={"gray.200"}
             >
-              <Text fontSize={"lg"}>{chat.name?chat.name : chat.users[1].name}</Text>
+              <Text fontSize={"lg"}>{chat.name?chat.name : getSenderName(User,chat.users)}</Text>
               <Text color={"blackAlpha.600"}>Message Yourself</Text>
             </Box>
           </>

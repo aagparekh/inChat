@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./MyChat.css";
 import {
   Avatar,
@@ -14,6 +14,7 @@ import {
   MenuList,
   Spacer,
   Square,
+  Text,
   Tooltip,
   useToast,
 } from "@chakra-ui/react";
@@ -21,11 +22,15 @@ import SideDrawer from "../miscellaneous/SideDrawer/SideDrawer";
 import { ChatState } from "../../context/ChatProvider";
 import { BellIcon, Search2Icon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
+import ChatLoading from "../miscellaneous/ChatLoading";
+import UserList from "../miscellaneous/UserList/UserList"
+
 
 const MyChat = () => {
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
   const [DrawerCategory, setDrawerCategory] = useState(false);
-  const { User } = ChatState();
+  const { User,CurrentUserChat, setCurrentUserChat,SelectedChat,setSelectedChat,FetchAgain, setFetchAgain} = ChatState();
+  const [Loading, setLoading] = useState(false)
   const navigate = useNavigate();
   const toast = useToast();
   
@@ -52,6 +57,45 @@ const MyChat = () => {
       position: "top",
     });
   }
+  const accessChat = (chat)=>{
+    setSelectedChat(chat)
+  }
+ 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/chat", {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${User.token}`,
+          },
+        });
+
+        // if (!response.ok && response.) {
+        //   throw new Error('Failed to fetch data from API');
+        // }
+
+        const data = await response.json();
+        console.log(data);
+        setLoading(false);
+        setCurrentUserChat(data);
+        
+      } catch (error) {
+        // Handle error here
+        console.error(error);
+      }
+    };
+    fetchUser();
+    // console.log(SelectedChat);
+
+    // Cleanup function
+    return () => {
+      // Cancel any ongoing requests here
+    };
+    
+  }, [isOpenDrawer])
+  
   return (
     <>
       <Flex
@@ -114,6 +158,27 @@ const MyChat = () => {
           drawerCat={DrawerCategory}
         ></SideDrawer>
       </Flex>
+      <Box pt={1}>
+                  {
+                  Loading == true ? (
+                    <ChatLoading />
+                  ) :   // console.log(CurrentUserChat))
+                  (CurrentUserChat.length === 0 ? (
+                    <Center h={"100%"} color={"blackAlpha.600"}>
+                      Create or make new chats...
+                    </Center>
+                  ) : 
+                  (CurrentUserChat?.map((chat) => {
+                    return (
+                      <UserList
+                        key={chat._id}
+                        chat={chat}
+                        openChat={() => accessChat(chat)}
+                      />
+                    );
+                  }))
+                  )}
+                </Box>
     </>
   );
 };
