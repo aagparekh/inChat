@@ -173,13 +173,21 @@ const removeFromGroup = expressAsyncHandler(async(req,res)=>{
   ).populate("users", "-password")
   .populate("groupAdmin", "-password");
 
-  if (!addToGroup) {
+  if (!removeFromGroup) {
     return res.status(400).json({ error: "Invalid Input" });
   }
   return res.status(200).json(removeFromGroup);
 })
 
 // *************************Route 6**************************
+
+
+const deleteChats = expressAsyncHandler(async(req,res)=>{
+  const {chatId} = req.body;
+
+  const deletechats = await Chat.findByIdAndDelete(chatId);
+  return res.status(200).json(deletechats)
+})
 
 
 
@@ -189,5 +197,6 @@ module.exports = {
   createGroupChat,
   renameGroup,
   addToGroup,
-  removeFromGroup
+  removeFromGroup,
+  deleteChats
 };

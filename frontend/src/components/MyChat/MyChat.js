@@ -28,23 +28,50 @@ import UserList from "../miscellaneous/UserList/UserList"
 
 const MyChat = () => {
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
-  const [DrawerCategory, setDrawerCategory] = useState(false);
-  const { User,CurrentUserChat, setCurrentUserChat,SelectedChat,setSelectedChat,FetchAgain, setFetchAgain} = ChatState();
+  const [DrawerCategory, setDrawerCategory] = useState("");
+  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat,setFetchAllUsers} = ChatState();
   const [Loading, setLoading] = useState(false)
   const navigate = useNavigate();
   const toast = useToast();
   
-  const handleOpenDrawer = (event) => {
-    const myButton = event.target.getAttribute("name");
-    console.log(event.target.getAttribute("name"));
-    myButton === "SearchButton"
-      ? setDrawerCategory(false)
-      : setDrawerCategory(true);
+  const handleOpenDrawer = () => {
     setisOpenDrawer(true);
   };
   const handleCloseDrawer = () => {
     setisOpenDrawer(false);
   };
+  const profileHandler = () =>{
+    setDrawerCategory("Profile");
+    handleOpenDrawer();
+  }
+  const searchHandler = () =>{
+    setDrawerCategory("Search");
+    handleOpenDrawer();
+  }
+  const groupHandler = async()=>{
+    setDrawerCategory("Group");
+    try {
+      const response = await fetch("/api/user/fetchalluser", {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${User.token}`,
+        },
+      });
+
+      // if (!response.ok && response.) {
+      //   throw new Error('Failed to fetch data from API');
+      // }
+
+      const data = await response.json();
+      // console.log(data);
+      setFetchAllUsers(data);
+      
+    } catch (error) {
+      // Handle error here
+      console.error(error);
+    }
+    handleOpenDrawer();
+  }
 
   const logoutHandler = ()=>{
     localStorage.removeItem("userInfo");
@@ -112,7 +139,7 @@ const MyChat = () => {
               name={User.name}
               src={User.pic}
               as={"button"}
-              onClick={handleOpenDrawer}
+              onClick={profileHandler}
             ></Avatar>
           </Tooltip>
         </Box>
@@ -123,14 +150,16 @@ const MyChat = () => {
               fontSize={"xl"}
               my={2}
               color={"white"}
-              onClick={handleOpenDrawer}
-              name={"SearchButton"}
+              onClick={searchHandler}
+              // name={"SearchButton"}
               cursor={"pointer"}
             ></Search2Icon>
           </Tooltip>
           <Tooltip label="Create New Group" hasArrow placement="bottom">
-            <Square cursor={"pointer"}>
-              <i class="fa-solid fa-user-group" style={{ color: "white" }}></i>
+            <Square cursor={"pointer"} 
+              onClick={groupHandler}
+            >
+              <i class="fa-solid fa-user-group"  style={{ color: "white" }}></i>
             </Square>
           </Tooltip>
 
@@ -158,7 +187,7 @@ const MyChat = () => {
           drawerCat={DrawerCategory}
         ></SideDrawer>
       </Flex>
-      <Box pt={1}>
+      <Box pt={1} className="searchChats" h={"89%"} w={"100%"}>
                   {
                   Loading == true ? (
                     <ChatLoading />

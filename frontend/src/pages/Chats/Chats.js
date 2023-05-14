@@ -21,7 +21,7 @@ const Chats = () => {
     </Box>
     <Box
     flex={1}
-    bg={"#eae6df"}
+    bg={"#f0f2f5"}
     boxShadow="0px 8px 12px rgba(0, 0, 0, 0.1)"
     >
         {User && <ChatBox/>}

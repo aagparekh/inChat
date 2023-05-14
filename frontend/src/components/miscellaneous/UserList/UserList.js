@@ -3,16 +3,17 @@ import React from "react";
 import { getSenderName, getSenderPic } from "../../../config/ChatSender";
 import { ChatState } from "../../../context/ChatProvider";
 
-const chatList = ({ chat, openChat }) => {
+const chatList = ({ chat, handleClick }) => {
   const {User,SelectedChat,setSelectedChat} = ChatState();
+  // console.log(chat.isGroupChat);
   return (
     <>
       <HStack
         px={4}
         _hover={{ backgroundColor: "#f0f2f5" }}
-        onClick={openChat}
+        onClick={handleClick}
         cursor={"pointer"}
-        backgroundColor={SelectedChat._id === chat._id? "#f0f2f5" : "transparent" }
+        backgroundColor={SelectedChat === chat? "#f0f2f5" : "transparent" }
       >
         {chat.isGroupChat ? (
           <>
@@ -39,7 +40,7 @@ const chatList = ({ chat, openChat }) => {
             <Avatar
               size={"md"}
               cursor={"pointer"}
-              name={"Aagam Parekh"}
+              name={chat.name?chat.name : getSenderName(User,chat.users)}
               src={chat.pic?chat.pic: getSenderPic(User,chat.users) }
             ></Avatar>
             <Box

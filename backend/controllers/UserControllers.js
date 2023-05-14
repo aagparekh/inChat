@@ -104,4 +104,16 @@ const allUsers = asyncHandler(async (req, res) => {
 
 // *************************Route 3**************************
 
-module.exports = { registerUser, authUser, allUsers };
+const fetchAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const query = { _id: { $ne: req.user._id } };
+    const users = await User.find(query);
+    res.status(200).send(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
+});
+
+
+module.exports = { registerUser, authUser, allUsers,fetchAllUsers };
