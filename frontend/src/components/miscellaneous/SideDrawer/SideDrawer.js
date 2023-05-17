@@ -42,6 +42,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
     setCurrentUserChat,
     setSelectedChat,
     FetchAllUsers,
+    SelectedChat,
     setFetchAllUsers,
   } = ChatState();
   const [FetchAgain, setFetchAgain] = useState(false);
@@ -151,6 +152,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       });
       const data = await response.json();
       setSelectedChat(data);
+      console.log(data);
       // if(!CurrentUserChat.find((c)=>c._id == data._id))
       // {
       //   setCurrentUserChat([data,...CurrentUserChat]);
@@ -160,8 +162,8 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       setInputValue();
       onClose();
       if (CurrentUserChat.includes(data)) {
+        
         toast({
-          title: "Chat created.",
           description: "Enjoy Chatting!!",
           status: "success",
           duration: 4000,
@@ -170,6 +172,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
         });
       } else {
         toast({
+          title: "Chat created.",
           description: "Enjoy Chatting!!",
           status: "success",
           duration: 4000,
@@ -360,7 +363,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                     Create or make new chats...
                   </Center>
                 ) : (
-                  CurrentUserChat?.map((chat) => {
+                  CurrentUserChat?.filter((chat)=> !chat.isGroupChat).map((chat) => {
                     // add this line to print the user object
                     return (
                       <UserList

@@ -29,7 +29,7 @@ import UserList from "../miscellaneous/UserList/UserList"
 const MyChat = () => {
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
   const [DrawerCategory, setDrawerCategory] = useState("");
-  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat,setFetchAllUsers} = ChatState();
+  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat,setFetchAllUsers,SelectedChat} = ChatState();
   const [Loading, setLoading] = useState(false)
   const navigate = useNavigate();
   const toast = useToast();
@@ -74,6 +74,7 @@ const MyChat = () => {
   }
 
   const logoutHandler = ()=>{
+    setSelectedChat()
     localStorage.removeItem("userInfo");
     navigate("/");
     toast({
@@ -86,6 +87,8 @@ const MyChat = () => {
   }
   const accessChat = (chat)=>{
     setSelectedChat(chat)
+    console.log(SelectedChat);
+
   }
  
   useEffect(() => {
@@ -202,7 +205,7 @@ const MyChat = () => {
                       <UserList
                         key={chat._id}
                         chat={chat}
-                        openChat={() => accessChat(chat)}
+                        handleClick={() => accessChat(chat)}
                       />
                     );
                   }))

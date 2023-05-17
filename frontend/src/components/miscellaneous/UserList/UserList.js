@@ -6,6 +6,7 @@ import { ChatState } from "../../../context/ChatProvider";
 const chatList = ({ chat, handleClick }) => {
   const {User,SelectedChat,setSelectedChat} = ChatState();
   // console.log(chat.isGroupChat);
+  // console.log(SelectedChat);
   return (
     <>
       <HStack
