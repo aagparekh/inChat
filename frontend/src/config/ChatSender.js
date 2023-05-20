@@ -11,6 +11,10 @@ export const getSenderId = (loggedUser,users)=>{
     // console.log(users);
     return users[0]._id === loggedUser._id ? users[1]._id : users[0]._id;
 }
+export const getSenderEmail = (loggedUser,users)=>{
+    // console.log(users);
+    return users[0]._id === loggedUser._id ? users[1].email : users[0].email;
+}
 export const getSender = (loggedUser,users)=>{
     // console.log(chat);
     // console.log("Logged User",loggedUser);

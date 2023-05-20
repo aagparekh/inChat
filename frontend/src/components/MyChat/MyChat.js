@@ -29,7 +29,7 @@ import UserList from "../miscellaneous/UserList/UserList"
 const MyChat = () => {
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
   const [DrawerCategory, setDrawerCategory] = useState("");
-  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat,setFetchAllUsers,SelectedChat} = ChatState();
+  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat,setFetchAllUsers,SelectedChat,Fetch,setFetch} = ChatState();
   const [Loading, setLoading] = useState(false)
   const navigate = useNavigate();
   const toast = useToast();
@@ -124,7 +124,7 @@ const MyChat = () => {
       // Cancel any ongoing requests here
     };
     
-  }, [isOpenDrawer])
+  }, [Fetch])
   
   return (
     <>

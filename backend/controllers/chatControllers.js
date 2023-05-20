@@ -137,14 +137,15 @@ const renameGroup = expressAsyncHandler(async (req, res) => {
 
 // *************************Route 5**************************
 const addToGroup = expressAsyncHandler(async (req, res) => {
-  const { chatId, userId } = req.body;
-  if (!chatId || !userId) {
+  const { chatId } = req.body;
+  let users = JSON.parse(req.body.users);
+  if (!chatId || !users) {
     return res.status(400).json({ error: "Invalid Input" });
   }
   const addToGroup = await Chat.findByIdAndUpdate(
     chatId,
     {
-      $push: { users: userId },
+      $push: { users: users },
     },
     { new: true }
   ).populate("users", "-password")
@@ -185,7 +186,7 @@ const removeFromGroup = expressAsyncHandler(async(req,res)=>{
 const deleteChats = expressAsyncHandler(async(req,res)=>{
   const {chatId} = req.body;
 
-  const deletechats = await Chat.findByIdAndDelete(chatId);
+  const deletechats = await Chat.findByIdAndDelete(chatId).populate("users", "-password");
   return res.status(200).json(deletechats)
 })
 

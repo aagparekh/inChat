@@ -1,7 +1,8 @@
 #drawer-header
 {
     height: 64px;
-    background-color: #00a884de;    
+    background-color: #00a884de;  
+    /* background-color: #ebedf0c4; */
     width: 100%;
 }
 .searchChats

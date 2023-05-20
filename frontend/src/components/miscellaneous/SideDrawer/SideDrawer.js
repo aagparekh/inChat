@@ -161,8 +161,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       setSearchedUser();
       setInputValue();
       onClose();
-      if (CurrentUserChat.includes(data)) {
-        
+      if (CurrentUserChat.find((chat)=> chat._id === data._id)) {  
         toast({
           description: "Enjoy Chatting!!",
           status: "success",
@@ -257,7 +256,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
         // profile
         <Drawer isOpen={isOpen} onClose={onClose} placement="left">
           {/* <DrawerOverlay /> */}
-          <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={5}>
+          <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={6}>
             <div id="drawer-header">
               <DrawerCloseButton color={"white"} />
               <DrawerHeader color={"white"}>Profile</DrawerHeader>
@@ -301,7 +300,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
         // Search Users
         <Drawer isOpen={isOpen} onClose={onClose} placement="left">
           {/* <DrawerOverlay /> */}
-          <DrawerContent maxH="91vh" maxWidth={"430px"} ml={3} mt={5}>
+          <DrawerContent maxH="91vh" maxWidth={"430px"} ml={3} mt={6}>
             <div id="drawer-header">
               <DrawerCloseButton color={"white"} fontWeight={"black"} />
               <DrawerHeader color={"white"}>Search Users</DrawerHeader>
@@ -383,7 +382,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       ) : (
         <Drawer isOpen={isOpen} onClose={onClose} placement="left">
           {/* <DrawerOverlay /> */}
-          <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={5}>
+          <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={6}>
             <div id="drawer-header">
               <DrawerCloseButton color={"white"} />
               <DrawerHeader color={"white"}>
