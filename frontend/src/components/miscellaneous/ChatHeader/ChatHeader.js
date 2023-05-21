@@ -80,8 +80,8 @@ const ChatHeader = () => {
         )}
       </Flex>
       <RightSideDrawer
-        isOpen={isOpenDrawer}
-        onClose={handleCloseDrawer}
+        isOpenDrawer={isOpenDrawer}
+        onCloseDrawer={handleCloseDrawer}
         drawerCat={DrawerCategory}
       ></RightSideDrawer>
     </>

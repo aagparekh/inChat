@@ -1,4 +1,4 @@
-#drawer-header
+.drawer-header
 {
     height: 64px;
     background-color: #00a884de;    
@@ -9,3 +9,8 @@
     border-color: transparent;
     border-bottom-color: #00a884de;
   }
+.searchChats
+{    
+    overflow-y: scroll;
+
+}

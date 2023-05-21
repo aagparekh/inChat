@@ -3,7 +3,9 @@ import "./RightSideDrawer.css";
 import {
   Avatar,
   Box,
+  Button,
   Center,
+  Circle,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -13,9 +15,20 @@ import {
   HStack,
   IconButton,
   Input,
+  InputGroup,
+  InputLeftElement,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spacer,
   Spinner,
   Text,
+  calc,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { ChatState } from "../../../context/ChatProvider";
@@ -24,11 +37,20 @@ import {
   getSenderName,
   getSenderPic,
 } from "../../../config/ChatSender";
-import { AddIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
-// import UserList from "../UserList/UserList";
+import {
+  AddIcon,
+  ArrowBackIcon,
+  CheckIcon,
+  DeleteIcon,
+  EditIcon,
+  Search2Icon,
+} from "@chakra-ui/icons";
+import UserList from "../UserList/UserList";
 import GroupList from "../GroupList/GroupList";
+import ChatLoading from "../ChatLoading";
+import UserBadge from "../UserBadge/UserBadge";
 
-const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
+const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
   const {
     User,
     SelectedChat,
@@ -42,7 +64,12 @@ const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
   const toast = useToast();
   const [GroupNameCondition, setGroupNameCondition] = useState(false);
   const [GroupName, setGroupName] = useState("");
-  // setGroupName(SelectedChat.chatName)
+  const [openModal, setopenModal] = useState(false);
+  const [isFocus, setisFocus] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [SearchedUser, setSearchedUser] = useState([]);
+  const [Loading, setLoading] = useState(false);
+  const [SelectedGroupMembers, setSelectedGroupMembers] = useState([]);
 
   const HandleDeleteChat = async () => {
     const chatId = SelectedChat._id;
@@ -104,19 +131,125 @@ const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
       console.log(error);
     }
   };
+  const handleInputFocus = () => {
+    setisFocus(true);
+  };
+  const handleInputBlur = () => {
+    setisFocus(false);
+  };
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value);
+  };
   useEffect(() => {
     setGroupNameCondition(false);
     setGroupName("");
     return () => {};
-  }, [onClose]);
+  }, [onCloseDrawer]);
 
+  useEffect(() => {
+    const SearchUser = async () => {
+      try {
+        setLoading(true);
+        await fetch(`/api/user?search=${inputValue}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${User.token}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) =>
+            setSearchedUser(
+              data.filter(
+                (user) =>
+                  !SelectedChat?.users.find((user1) => user1._id === user._id)
+              )
+            )
+          );
+
+        //   if (!response.ok) {
+        //     throw new Error('Failed to fetch data from API');
+        //   }
+
+        //const data = await response.json();
+        setLoading(false);
+      } catch (error) {
+        // Handle error here
+        console.error(error);
+      }
+    };
+    if (inputValue) {
+      SearchUser();
+    } else {
+      setSearchedUser();
+    }
+    return () => {};
+  }, [inputValue]);
+  const HandleGroup = (user) => {
+    console.log(user);
+    if (
+      Boolean(SelectedGroupMembers.find((member) => member._id === user._id))
+    ) {
+      toast({
+        title: "User Already Exist",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+    setSelectedGroupMembers([...SelectedGroupMembers, user]);
+  };
+  const handleCloseFunction = (user) => {
+    // console.log(user);
+    setSelectedGroupMembers(
+      SelectedGroupMembers.filter((mem) => mem._id !== user._id)
+    );
+  };
+  const handleModalClose = () => {
+    setopenModal(false);
+    setInputValue("");
+    setSelectedGroupMembers([]);
+    setSearchedUser([]);
+  };
+  const addToGroup = async () => {
+    try {
+      const body = {
+        chatId: SelectedChat._id,
+        users: JSON.stringify(SelectedGroupMembers.map((user) => user._id)),
+      };
+      const response = await fetch("/api/chat/add-to-group", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${User.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      // console.log(data);
+      setSelectedChat(data);
+      setFetch(!Fetch);
+      toast({
+        title: "Member(s) Added Successfully",
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+        position: "top",
+      });
+
+      handleModalClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       {drawerCat === "Group" ? (
-        <Drawer isOpen={isOpen} onClose={onClose} placement="right">
+        <Drawer isOpen={isOpenDrawer} onClose={onCloseDrawer} placement="right">
           {/* <DrawerOverlay /> */}
           <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={6}>
-            <div id="drawer-header">
+            <div className="drawer-header">
               <DrawerCloseButton color={"white"} />
               <DrawerHeader color={"white"}>Group info</DrawerHeader>
             </div>
@@ -206,7 +339,7 @@ const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
                     px={4}
                     py={2}
                     _hover={{ backgroundColor: "#f0f2f5" }}
-                    // onClick={handleClick}
+                    onClick={() => setopenModal(true)}
                     cursor={"pointer"}
                     backgroundColor={"transparent"}
                   >
@@ -214,7 +347,7 @@ const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
                       size={"md"}
                       cursor={"pointer"}
                       bg="#00a884de"
-                      icon={<AddIcon/>}
+                      icon={<AddIcon />}
                     ></Avatar>
                     <Box p={2} w={"100%"}>
                       <Text fontSize={"lg"}>Add Participants</Text>
@@ -247,7 +380,7 @@ const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
           </DrawerContent>
         </Drawer>
       ) : (
-        <Drawer isOpen={isOpen} onClose={onClose} placement="right">
+        <Drawer isOpen={isOpenDrawer} onClose={onCloseDrawer} placement="right">
           {/* <DrawerOverlay /> */}
           <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={6}>
             <div id="drawer-header">
@@ -325,6 +458,104 @@ const RightSideDrawer = ({ isOpen, onClose, drawerCat }) => {
           </DrawerContent>
         </Drawer>
       )}
+
+      <Modal isOpen={openModal} onClose={handleModalClose}>
+        <ModalOverlay />
+        <ModalContent h={"75vh"} w={"430px"}>
+          <div className="drawer-header">
+            <ModalHeader color={"white"}>Add Participants</ModalHeader>
+            <ModalCloseButton color={"white"} />
+          </div>
+          <ModalBody p={0}>
+            <Box borderBottom="2px" borderBottomColor="gray.200" px={4} py={2}>
+              <InputGroup onFocus={handleInputFocus} onBlur={handleInputBlur}>
+                <InputLeftElement>
+                  {isFocus || inputValue ? (
+                    <ArrowBackIcon
+                      fontSize={"xl"}
+                      cursor={"pointer"}
+                      color={"green"}
+                      fontWeight={"black"}
+                      mt={4}
+                      // onClick={handleSearch}
+                    ></ArrowBackIcon>
+                  ) : (
+                    <Search2Icon
+                      fontSize={"md"}
+                      cursor={"pointer"}
+                      color={"grey"}
+                      mt={4}
+                    ></Search2Icon>
+                  )}
+                </InputLeftElement>
+                <Input
+                  placeholder="Type name..."
+                  my={2}
+                  onChange={handleInputChange}
+                  backgroundColor={"#f0f2f5"}
+                ></Input>
+              </InputGroup>
+            </Box>
+            {SelectedGroupMembers.length > 0 ? (
+              <Box
+                borderBottom="2px"
+                borderBottomColor="gray.200"
+                h={"15%"}
+                pb={2}
+                overflowY={"scroll"}
+                m={2}
+                display={"flex"}
+                flexWrap={"wrap"}
+              >
+                {SelectedGroupMembers.map((user) => (
+                  <UserBadge
+                    key={user._id}
+                    user={user}
+                    HandleClick={() => handleCloseFunction(user)}
+                  />
+                ))}
+              </Box>
+            ) : null}
+            <Box h={"48%"} overflowY={"scroll"}>
+              {Loading ? (
+                <ChatLoading />
+              ) : SearchedUser?.length > 0 ? (
+                SearchedUser.map((userChat) => (
+                  <UserList
+                    key={userChat._id}
+                    chat={userChat}
+                    handleClick={() => HandleGroup(userChat)}
+                  />
+                ))
+              ) : inputValue === "" ? (
+                <Center h="100%" color="blackAlpha.600">
+                  Search name...
+                </Center>
+              ) : (
+                <Center h="100%" color="blackAlpha.600">
+                  No results found for '{inputValue}'
+                </Center>
+              )}
+            </Box>
+            <Center
+              w={"100%"}
+              h={SelectedGroupMembers.length > 0 ? "16%" : "36%"}
+              backgroundColor={"#f0f2f5"}
+            >
+              {SelectedGroupMembers.length > 0 ? (
+                <Circle
+                  size="50px"
+                  bg="#00a884de"
+                  color="white"
+                  onClick={addToGroup}
+                >
+                  <CheckIcon boxSize={5} cursor={"pointer"} />
+                </Circle>
+              ) : null}
+            </Center>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </>
   );
 };
