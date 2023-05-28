@@ -21,14 +21,11 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spacer,
   Spinner,
   Text,
-  calc,
-  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { ChatState } from "../../../context/ChatProvider";
@@ -41,8 +38,6 @@ import {
   AddIcon,
   ArrowBackIcon,
   CheckIcon,
-  DeleteIcon,
-  EditIcon,
   Search2Icon,
 } from "@chakra-ui/icons";
 import UserList from "../UserList/UserList";
@@ -158,6 +153,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
         })
           .then((res) => res.json())
           .then((data) =>
+            // filtering the user which are already existed in the group
             setSearchedUser(
               data.filter(
                 (user) =>
@@ -185,7 +181,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
     return () => {};
   }, [inputValue]);
   const HandleGroup = (user) => {
-    console.log(user);
+    // console.log(user);
     if (
       Boolean(SelectedGroupMembers.find((member) => member._id === user._id))
     ) {
@@ -214,6 +210,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
   };
   const addToGroup = async () => {
     try {
+      setSpinnerLoading(true);
       const body = {
         chatId: SelectedChat._id,
         users: JSON.stringify(SelectedGroupMembers.map((user) => user._id)),
@@ -230,6 +227,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
       // console.log(data);
       setSelectedChat(data);
       setFetch(!Fetch);
+      setSpinnerLoading(false);
       toast({
         title: "Member(s) Added Successfully",
         status: "success",
@@ -239,6 +237,38 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
       });
 
       handleModalClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleRemoveGroupMember = async () => {
+    const body = {
+      chatId: SelectedChat._id,
+      userId: User._id,
+    };
+    try {
+      setSpinnerLoading(true);
+      const response = await fetch("/api/chat/remove-from-group", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${User.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      setCurrentUserChat(
+        CurrentUserChat.filter((chat) => chat._id !== data._id)
+      );
+      setSpinnerLoading(false);
+      setSelectedChat();
+      toast({
+        title: `You left "${data.chatName}"`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
     } catch (error) {
       console.log(error);
     }
@@ -366,15 +396,42 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
                 cursor={"pointer"}
                 _hover={{ backgroundColor: "#ebedf096" }}
               >
-                <Flex alignItems="center" gap={5}>
-                  <i
-                    class="fa-solid fa-arrow-right-from-bracket"
-                    style={{ color: "red", fontSize: "18px" }}
-                  ></i>
-                  <Text color={"red.500"} fontSize={"lg"}>
-                    Exit group
-                  </Text>
-                </Flex>
+                {SelectedChat.groupAdmin?._id === User._id ? (
+                  <Flex alignItems="center" gap={5} onClick={HandleDeleteChat}>
+                    <i
+                      class="fa-solid fa-trash"
+                      style={{ color: "red", fontSize: "18px" }}
+                    ></i>
+                    <Text color={"red.500"} fontSize={"lg"}>
+                      Delete group
+                    </Text>
+                  </Flex>
+                ) : (
+                  <Flex
+                    alignItems="center"
+                    gap={5}
+                    onClick={handleRemoveGroupMember}
+                  >
+                    <i
+                      class="fa-solid fa-arrow-right-from-bracket"
+                      style={{ color: "red", fontSize: "18px" }}
+                    ></i>
+                    <Text color={"red.500"} fontSize={"lg"}>
+                      Exit group
+                    </Text>
+                  </Flex>
+                )}
+                {SpinnerLoading ? (
+                  <Center>
+                    <Spinner
+                      thickness="3px"
+                      speed="0.65s"
+                      emptyColor="gray.200"
+                      color="whatsapp.500"
+                      size="lg"
+                    />
+                  </Center>
+                ) : null}
               </Box>
             </DrawerBody>
           </DrawerContent>
@@ -459,7 +516,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
         </Drawer>
       )}
 
-      <Modal isOpen={openModal} onClose={handleModalClose}>
+      <Modal isOpen={openModal} onClose={handleModalClose} isCentered>
         <ModalOverlay />
         <ModalContent h={"75vh"} w={"430px"}>
           <div className="drawer-header">
@@ -516,7 +573,10 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
                 ))}
               </Box>
             ) : null}
-            <Box h={"48%"} overflowY={"scroll"}>
+            <Box
+              h={SelectedGroupMembers.length > 0 ? "33%" : "48%"}
+              overflowY={"scroll"}
+            >
               {Loading ? (
                 <ChatLoading />
               ) : SearchedUser?.length > 0 ? (
@@ -529,7 +589,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
                 ))
               ) : inputValue === "" ? (
                 <Center h="100%" color="blackAlpha.600">
-                  Search name...
+                  Search name to add participants...
                 </Center>
               ) : (
                 <Center h="100%" color="blackAlpha.600">
@@ -543,14 +603,26 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
               backgroundColor={"#f0f2f5"}
             >
               {SelectedGroupMembers.length > 0 ? (
-                <Circle
-                  size="50px"
-                  bg="#00a884de"
-                  color="white"
-                  onClick={addToGroup}
-                >
-                  <CheckIcon boxSize={5} cursor={"pointer"} />
-                </Circle>
+                SpinnerLoading ? (
+                  <Center>
+                    <Spinner
+                      thickness="3px"
+                      speed="0.65s"
+                      emptyColor="gray.200"
+                      color="whatsapp.500"
+                      size="lg"
+                    />
+                  </Center>
+                ) : (
+                  <Circle
+                    size="50px"
+                    bg="#00a884de"
+                    color="white"
+                    onClick={addToGroup}
+                  >
+                    <CheckIcon boxSize={5} cursor={"pointer"} />
+                  </Circle>
+                )
               ) : null}
             </Center>
           </ModalBody>

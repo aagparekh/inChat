@@ -2,6 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+
 // const {chats} = require('./data');
 const connetDB = require('./config/db');
 const {notFound} = require('./middleware/errorMiddleware')
@@ -20,6 +22,9 @@ app.use('/api/user', userRoutes);
 
 // All The Chat Routes
 app.use('/api/chat', chatRoutes);
+
+// All The Messages Routes
+app.use('/api/message',messageRoutes);
 
 
 app.use(notFound);

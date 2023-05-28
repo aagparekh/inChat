@@ -17,11 +17,7 @@ import {
   Circle,
 } from "@chakra-ui/react";
 import "./SideDrawer.css";
-import {
-  ArrowBackIcon,
-  CheckIcon,
-  Search2Icon,
-} from "@chakra-ui/icons";
+import { ArrowBackIcon, CheckIcon, Search2Icon } from "@chakra-ui/icons";
 import ChatLoading from "../ChatLoading";
 import { ChatState } from "../../../context/ChatProvider";
 import UserList from "../UserList/UserList";
@@ -44,10 +40,12 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
     FetchAllUsers,
     SelectedChat,
     setFetchAllUsers,
+    setFetch,
+    Fetch,
   } = ChatState();
   const [FetchAgain, setFetchAgain] = useState(false);
   const [SearchFiltered, setSearchFiltered] = useState([]);
-  const [GroupChatName, setGroupChatName] = useState('')
+  const [GroupChatName, setGroupChatName] = useState("");
   const filteredUsers = FetchAllUsers?.filter(
     (user) => !SelectedGroupMembers?.includes(user)
   );
@@ -161,7 +159,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       setSearchedUser();
       setInputValue();
       onClose();
-      if (CurrentUserChat.find((chat)=> chat._id === data._id)) {  
+      if (CurrentUserChat.find((chat) => chat._id === data._id)) {
         toast({
           description: "Enjoy Chatting!!",
           status: "success",
@@ -185,7 +183,7 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
   };
 
   const HandleGroup = (user) => {
-    console.log(user);
+    // console.log(user);
     if (
       Boolean(SelectedGroupMembers.find((member) => member._id === user._id))
     ) {
@@ -207,8 +205,8 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       SelectedGroupMembers.filter((mem) => mem._id !== user._id)
     );
   };
-  const createGroup = async()=>{
-    if(GroupChatName == '' || SelectedGroupMembers.length ==0){
+  const createGroup = async () => {
+    if (GroupChatName == "" || SelectedGroupMembers.length == 0) {
       toast({
         description: "Please Fill All The Fields",
         status: "error",
@@ -221,15 +219,15 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
     try {
       const body = {
         name: GroupChatName,
-        users: JSON.stringify(SelectedGroupMembers.map((user)=> user._id)) 
+        users: JSON.stringify(SelectedGroupMembers.map((user) => user._id)),
       };
-      const response = await fetch('/api/chat/group',{
-        method: 'POST',
+      const response = await fetch("/api/chat/group", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${User.token}`,
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       // console.log(data);
@@ -242,14 +240,11 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
       });
       setSelectedGroupMembers([]);
       onClose();
-
-
+      setFetch(!Fetch);
     } catch (error) {
       console.log(error);
     }
-
-    
-  }
+  };
   return (
     <>
       {drawerCat === "Profile" ? (
@@ -362,18 +357,20 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                     Create or make new chats...
                   </Center>
                 ) : (
-                  CurrentUserChat?.filter((chat)=> !chat.isGroupChat).map((chat) => {
-                    // add this line to print the user object
-                    return (
-                      <UserList
-                        key={chat._id}
-                        chat={chat}
-                        handleClick={() =>
-                          accessChat(getSenderId(User, chat.users))
-                        }
-                      />
-                    );
-                  })
+                  CurrentUserChat?.filter((chat) => !chat.isGroupChat).map(
+                    (chat) => {
+                      // add this line to print the user object
+                      return (
+                        <UserList
+                          key={chat._id}
+                          chat={chat}
+                          handleClick={() =>
+                            accessChat(getSenderId(User, chat.users))
+                          }
+                        />
+                      );
+                    }
+                  )
                 )}
               </Box>
             </DrawerBody>
@@ -385,25 +382,28 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
           <DrawerContent maxH="91vh" maxWidth={"430px"} mx={3} mt={6}>
             <div id="drawer-header">
               <DrawerCloseButton color={"white"} />
-              <DrawerHeader color={"white"}>
-                New Group
-              </DrawerHeader>
+              <DrawerHeader color={"white"}>New Group</DrawerHeader>
             </div>
 
             <DrawerBody overflowX={"hidden"} p={0}>
-              <Box borderBottom="2px" borderBottomColor="gray.200" px={4} py={2}>
-              <Input
-                    placeholder="Add a group name"
-                    my={2}
-                    p={1}
-                    border={"none"}
-                    borderBottom={"2px"}
-                    borderRadius={"none"}
-                    borderBottomColor={"#00a884de"}
-                    _hover={"none"}
-                    id="groupname"
-                    onChange={(e)=> setGroupChatName(e.target.value)}
-                  ></Input>
+              <Box
+                borderBottom="2px"
+                borderBottomColor="gray.200"
+                px={4}
+                py={2}
+              >
+                <Input
+                  placeholder="Add a group name"
+                  my={2}
+                  p={1}
+                  border={"none"}
+                  borderBottom={"2px"}
+                  borderRadius={"none"}
+                  borderBottomColor={"#00a884de"}
+                  _hover={"none"}
+                  id="groupname"
+                  onChange={(e) => setGroupChatName(e.target.value)}
+                ></Input>
                 <InputGroup onFocus={handleInputFocus} onBlur={handleInputBlur}>
                   <InputLeftElement>
                     {isFocus || inputValue ? (
@@ -497,7 +497,12 @@ const SideDrawer = ({ isOpen, onClose, drawerCat }) => {
                 backgroundColor={"#f0f2f5"}
               >
                 {SelectedGroupMembers.length > 0 ? (
-                  <Circle size="50px" bg="#00a884de" color="white" onClick={createGroup}>
+                  <Circle
+                    size="50px"
+                    bg="#00a884de"
+                    color="white"
+                    onClick={createGroup}
+                  >
                     <CheckIcon boxSize={5} cursor={"pointer"} />
                   </Circle>
                 ) : null}
