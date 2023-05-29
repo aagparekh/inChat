@@ -22,7 +22,6 @@ const SingleChat = () => {
   const [SpinnerLoading, setSpinnerLoading] = useState(false);
   const [newMessage, setnewMessage] = useState();
   const containerRef = useRef(null);
-
   const fetchAllMessage = async()=>{
     if (!SelectedChat) return;
     setSpinnerLoading(true)
@@ -108,14 +107,15 @@ const SingleChat = () => {
               size="xl"
             />
           </Square>
-        ) : (
+        ) : Messages.length>0? (
           <Flex flexDirection={'column'}          
           >
             <ScrollableChat messages = {Messages}/>
           </Flex>
-        )}
+        ): 
+        <Text textAlign={'center'} color={'blackAlpha.600'}>Say hii to your buddy {getSenderName(User,SelectedChat.users)} .... </Text>
+        }
       </Box>
-
 
       <Flex
         h={"64px"}
