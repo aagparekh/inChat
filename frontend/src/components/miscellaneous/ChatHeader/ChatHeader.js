@@ -1,14 +1,20 @@
 import { Avatar, Box, Flex, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { getSenderName, getSenderPic } from "../../../config/ChatSender";
+import {
+  getSenderId,
+  getSenderName,
+  getSenderPic,
+} from "../../../config/ChatSender";
 import { ChatState } from "../../../context/ChatProvider";
 import RightSideDrawer from "../RightSideDrawer/RightSideDrawer";
 
-const ChatHeader = () => {
+const ChatHeader = ({ isTyping, name }) => {
   const { User, SelectedChat } = ChatState();
   const [DrawerCategory, setDrawerCategory] = useState("");
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
+  // console.log(onlineStatus?.includes(getSenderId(User, SelectedChat?.users)));
 
+  // console.log(name);
   const handleOpenDrawer = () => {
     setisOpenDrawer(true);
   };
@@ -42,40 +48,63 @@ const ChatHeader = () => {
               <Text color={"white"} fontSize={"18px"} fontWeight={"semibold"}>
                 {SelectedChat.chatName}
               </Text>
-              <Flex>
-                {SelectedChat.users.map((user, index) => {
-                  const isLastUser = index === SelectedChat.users.length - 1;
-                  return (
-                    <Text
-                      key={user._id}
-                      color="white"
-                      fontSize="15px"
-                      fontWeight="normal"
-                      mr={1}
-                    >
-                      {user.name === User.name ? "You" : user.name}
-                      {!isLastUser && ","}
-                    </Text>
-                  );
-                })}
-              </Flex>
+              {isTyping ? (
+                <Text fontSize={"15px"} color={"white"}>
+                  {name} is typing...
+                </Text>
+              ) : (
+                <Flex>
+                  {SelectedChat.users.map((user, index) => {
+                    const isLastUser = index === SelectedChat.users.length - 1;
+                    return (
+                      <Text
+                        key={user._id}
+                        color="white"
+                        fontSize="15px"
+                        fontWeight="normal"
+                        mr={1}
+                      >
+                        {user.name === User.name ? "You" : user.name}
+                        {!isLastUser && ","}
+                      </Text>
+                    );
+                  })}
+                </Flex>
+              )}
             </Box>
           </Flex>
         ) : (
           <>
-          <Box display={"flex"} alignItems="center" onClick={oneProfileHandler} w={"100%"}>
-            <Box p="2" mx={1}>
-              <Avatar
-                size={"md"}
-                cursor={"pointer"}
-                name={getSenderName(User, SelectedChat?.users)}
-                src={getSenderPic(User, SelectedChat?.users)}
-                as={"button"}
-              ></Avatar>
+            <Box
+              display={"flex"}
+              alignItems="center"
+              onClick={oneProfileHandler}
+              w={"100%"}
+            >
+              <Box p="2" mx={1}>
+                <Avatar
+                  size={"md"}
+                  cursor={"pointer"}
+                  name={getSenderName(User, SelectedChat?.users)}
+                  src={getSenderPic(User, SelectedChat?.users)}
+                  as={"button"}
+                ></Avatar>
+              </Box>
+              <Flex flexDirection={"column"}>
+                <Text color={"white"} fontSize={"18px"} fontWeight={"semibold"}>
+                  {getSenderName(User, SelectedChat?.users)}
+                </Text>
+                {/* {
+              onlineStatus?.includes(getSenderId(User, SelectedChat?.users)) ?
+              <Text>online</Text> : null
+            } */}
+                {isTyping ? (
+                  <Text fontSize={"15px"} color={"white"}>
+                    Typing...
+                  </Text>
+                ) : null}
+              </Flex>
             </Box>
-            <Text color={"white"} fontSize={"18px"} fontWeight={"semibold"}>
-              {getSenderName(User, SelectedChat?.users)}
-            </Text></Box>
           </>
         )}
       </Flex>

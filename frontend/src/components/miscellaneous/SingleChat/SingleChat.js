@@ -3,25 +3,63 @@ import "./SingleChat.css";
 import { ChatState } from "../../../context/ChatProvider";
 import { getSenderName } from "../../../config/ChatSender";
 import ChatHeader from "../ChatHeader/ChatHeader";
-import { getSenderPic } from "../../../config/ChatSender";
+// import { getSenderPic } from "../../../config/ChatSender";
 import {
   Box,
-  Center,
+  // Center,
   Flex,
   FormControl,
   Input,
-  Spacer,
+  // Spacer,
   Spinner,
   Square,
   Text,
 } from "@chakra-ui/react";
 import ScrollableChat from "../../ScrollableChat/ScrollableChat";
+import io from "socket.io-client"
+
+const ENDPOINT = "http://localhost:5000";
+let socket,SelectedChatCompare;
+
+
 const SingleChat = () => {
-  const { User, SelectedChat } = ChatState();
+  const { User, SelectedChat,Fetch,setFetch,CurrentUserChat } = ChatState();
   const [Messages, setMessages] = useState([]);
   const [SpinnerLoading, setSpinnerLoading] = useState(false);
   const [newMessage, setnewMessage] = useState();
   const containerRef = useRef(null);
+  const [socketConnected, setsocketConnected] = useState(false);
+  const [Typing, setTyping] = useState(false);
+  const [isTyping, setisTyping] = useState(false);
+  const [TyperName, setTyperName] = useState('')
+  useEffect(() => {
+    socket = io(ENDPOINT)
+    // console.log(socket);
+    socket.emit("setup",User);
+    socket.on('connected',()=>{
+      setsocketConnected(true)})
+    socket.on("typing", (name)=>{ 
+      setisTyping(true); 
+      setTyperName(name)
+     });
+    socket.on("stop typing", ()=>setisTyping(false))
+    }, [])
+    
+    // console.log(TyperName);
+  useEffect(() => {
+   socket.on("message recevied",(newMessageReceived)=>{
+
+    if(!SelectedChatCompare || SelectedChatCompare._id !== newMessageReceived.chat._id) {
+      // give notification
+    }
+    else{
+      setMessages([...Messages,newMessageReceived]);
+    }
+
+   }) 
+  })
+  
+
   const fetchAllMessage = async()=>{
     if (!SelectedChat) return;
     setSpinnerLoading(true)
@@ -36,12 +74,16 @@ const SingleChat = () => {
       setMessages(data)
       // console.log(data);
       setSpinnerLoading(false)
+
+      socket.emit("join room",SelectedChat._id);
     } catch (error) {
       console.log(error);
     }
   }
   useEffect(() => {
     fetchAllMessage();
+
+    SelectedChatCompare = SelectedChat;
     return () => {
     }
   }, [SelectedChat])
@@ -55,6 +97,7 @@ const SingleChat = () => {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   };
+
   const sendMessageOnEnter = async(event)=>{
     // console.log("sendMessageOnEnter is triggered");
     if((event.key === 'Enter' && newMessage) || ( event.type === 'click' && newMessage)){
@@ -74,20 +117,43 @@ const SingleChat = () => {
         const data = await response.json();
         // console.log(data);
         setnewMessage("");
+        socket.emit("new message",data);
         setMessages([...Messages, data]);
+        if(SelectedChat._id !== CurrentUserChat[0]._id){
+          setFetch(!Fetch);
+        }
       } catch (error) {
         console.log(error)
       }
     }
   }
+  
   const typingHandler = (e)=>{
     setnewMessage(e.target.value)
+
+    if(!socketConnected) return;
+
+    if(!Typing){
+      setTyping(true);
+      // console.log(User.name);
+      socket.emit("typing",SelectedChat._id,User.name);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timeLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if(timeDiff >= timeLength){
+        socket.emit("stop typing", SelectedChat._id);
+        setTyping(false)
+      }
+    }, 3000);
   }
   //   console.log(SelectedChat);
   return (
     <>
       <div id="ChatBox-header">
-        {SelectedChat ? <ChatHeader></ChatHeader> : null}
+        {SelectedChat ? <ChatHeader isTyping = {isTyping} name = {TyperName}></ChatHeader> : null}
       </div>
       <Box
         h={"80.2%"}
@@ -129,6 +195,7 @@ const SingleChat = () => {
         onKeyDown={sendMessageOnEnter}
         isRequired
         >
+          {/* {isTyping ? <div>Loading...</div> : null} */}
         <Input
           placeholder="Type a message"
           size={"lg"}

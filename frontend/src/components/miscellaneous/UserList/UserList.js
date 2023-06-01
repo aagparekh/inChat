@@ -1,10 +1,10 @@
-import { Avatar, Box, HStack, Heading, Square, Text } from "@chakra-ui/react";
+import { Avatar, Box, HStack, Text } from "@chakra-ui/react";
 import React from "react";
 import { getSenderName, getSenderPic } from "../../../config/ChatSender";
 import { ChatState } from "../../../context/ChatProvider";
 
 const chatList = ({ chat, handleClick }) => {
-  const {User,SelectedChat,setSelectedChat} = ChatState();
+  const {User,SelectedChat} = ChatState();
   // console.log(chat.isGroupChat);
   // console.log(SelectedChat);
   return (
@@ -14,7 +14,7 @@ const chatList = ({ chat, handleClick }) => {
         _hover={{ backgroundColor: "#f0f2f5" }}
         onClick={handleClick}
         cursor={"pointer"}
-        backgroundColor={SelectedChat === chat? "#f0f2f5" : "transparent" }
+        backgroundColor={SelectedChat?._id === chat._id? "#f0f2f5" : "transparent" }
       >
         {chat.isGroupChat ? (
           <>

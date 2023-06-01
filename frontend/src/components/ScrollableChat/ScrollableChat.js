@@ -1,4 +1,4 @@
-import { Avatar, Flex, Text, Tooltip, textDecoration } from "@chakra-ui/react";
+import { Avatar, Flex, Text, Tooltip} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { ChatState } from "../../context/ChatProvider";
 import {
@@ -9,18 +9,22 @@ import {
 
 const ScrollableChat = ({ messages }) => {
   const { User, SelectedChat } = ChatState();
+  const [Color, setColor] = useState('')
   // const [myDate, setmyDate] = useState("");
   let myDate = "";
   const generateRandomColor = () => {
     const letters = "0123456789ABCDEF";
     let color = "#";
-
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
 
     return color;
   };
+  useEffect(() => {
+    setColor(generateRandomColor)
+  }, [SelectedChat])
+  
   return (
     <>
       {messages &&
@@ -100,7 +104,7 @@ const ScrollableChat = ({ messages }) => {
                         fontSize={"13.8px"}
                         cursor={"pointer"}
                         _hover={{ textDecoration: "underline" }}
-                        color={generateRandomColor()}
+                        color={Color}
                       >
                        ~ {m.sender.name !== User.name ? m.sender.name : null}
                       </Text>
