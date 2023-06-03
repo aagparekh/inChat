@@ -16,15 +16,13 @@ import {
   Text,
 } from "@chakra-ui/react";
 import ScrollableChat from "../../ScrollableChat/ScrollableChat";
-import io from "socket.io-client"
 
-const ENDPOINT = "http://localhost:5000";
-let socket,SelectedChatCompare;
+// const ENDPOINT = "http://localhost:5000";
+// let SelectedChatCompare;
 
 
-const SingleChat = () => {
-  const { User, SelectedChat,Fetch,setFetch,CurrentUserChat } = ChatState();
-  const [Messages, setMessages] = useState([]);
+const SingleChat = ({socket}) => {
+  const { User, SelectedChat,Fetch,setFetch,CurrentUserChat,Messages, setMessages } = ChatState();
   const [SpinnerLoading, setSpinnerLoading] = useState(false);
   const [newMessage, setnewMessage] = useState();
   const containerRef = useRef(null);
@@ -32,10 +30,12 @@ const SingleChat = () => {
   const [Typing, setTyping] = useState(false);
   const [isTyping, setisTyping] = useState(false);
   const [TyperName, setTyperName] = useState('')
+  const [onlineName, setOnlineName] = useState('');
+
+
   useEffect(() => {
-    socket = io(ENDPOINT)
     // console.log(socket);
-    socket.emit("setup",User);
+    
     socket.on('connected',()=>{
       setsocketConnected(true)})
     socket.on("typing", (name)=>{ 
@@ -43,23 +43,27 @@ const SingleChat = () => {
       setTyperName(name)
      });
     socket.on("stop typing", ()=>setisTyping(false))
+    socket.on("online status",(name)=>setOnlineName(name))
     }, [])
     
     // console.log(TyperName);
-  useEffect(() => {
-   socket.on("message recevied",(newMessageReceived)=>{
+  // useEffect(() => {
+  //  socket.on("message recevied",(newMessageReceived)=>{
 
-    if(!SelectedChatCompare || SelectedChatCompare._id !== newMessageReceived.chat._id) {
-      // give notification
-    }
-    else{
-      setMessages([...Messages,newMessageReceived]);
-    }
+  //   if(!SelectedChatCompare || SelectedChatCompare._id !== newMessageReceived.chat._id) {
+  //     if(!notification.includes(newMessageReceived)){
+  //       setnotification([newMessageReceived,...notification]);
+  //       setFetch(!Fetch);
+  //     }
+  //   }
+  //   else{
+  //     setMessages([...Messages,newMessageReceived]);
+  //   }
 
-   }) 
-  })
-  
+  //  }) 
+  // })
 
+  // console.log(notification);
   const fetchAllMessage = async()=>{
     if (!SelectedChat) return;
     setSpinnerLoading(true)
@@ -75,7 +79,7 @@ const SingleChat = () => {
       // console.log(data);
       setSpinnerLoading(false)
 
-      socket.emit("join room",SelectedChat._id);
+      socket.emit("join room",SelectedChat._id,User.name);
     } catch (error) {
       console.log(error);
     }
@@ -83,7 +87,8 @@ const SingleChat = () => {
   useEffect(() => {
     fetchAllMessage();
 
-    SelectedChatCompare = SelectedChat;
+    
+    // socket.on("online status",(list_names)=>setOnlineName(list_names))
     return () => {
     }
   }, [SelectedChat])
@@ -153,7 +158,7 @@ const SingleChat = () => {
   return (
     <>
       <div id="ChatBox-header">
-        {SelectedChat ? <ChatHeader isTyping = {isTyping} name = {TyperName}></ChatHeader> : null}
+        {SelectedChat ? <ChatHeader isTyping = {isTyping} name = {TyperName} onlineName= {onlineName}></ChatHeader> : null}
       </div>
       <Box
         h={"80.2%"}

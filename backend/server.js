@@ -12,6 +12,7 @@ connetDB();
 const app = express();
 app.use(express.json());
 let joinedRoom;
+// let list_names=[];
 
 
 app.get("/", (req, res) => {
@@ -51,6 +52,10 @@ const io = require('socket.io')(server,{
 io.on("connection",(socket)=>{
     console.log(`Connected to Socket.io`);
     
+    // socket.on('userConnected', (userId) => {
+    //   socket.broadcast.emit('userStatusChanged', { userId, status: 'online' });
+    //   console.log(userId);
+    // });
     
     socket.on("setup",(userData)=>{
         socket.join(userData._id);
@@ -58,8 +63,10 @@ io.on("connection",(socket)=>{
         socket.emit("connected")
     })
 
-    socket.on("join room", (room)=>{
-        socket.join(room);
+    socket.on("join room", (room,name)=>{
+        socket.join(room)
+        // console.log(name);
+        socket.to(room).emit("online status",name);
         joinedRoom = room
         console.log("User Join room: "+room);
     })
@@ -75,11 +82,17 @@ io.on("connection",(socket)=>{
 
         if(!chat.users) return console.log("chat.users not defined");
 
-        socket.to(joinedRoom).emit("message recevied", newMessageReceived);
+        // socket.to(joinedRoom).emit("message recevied", newMessageReceived);
 
-        // chat.users.forEach(user => {
-        //     if(user._id == newMessageReceived.sender._id) return;
-        //     socket.to(joinedRoom).emit("message recevied", newMessageReceived);
-        // });
+        chat.users.forEach(user => {
+            if(user._id == newMessageReceived.sender._id) return;
+            socket.in(user._id).emit("message recevied", newMessageReceived);
+        });
     })
-});
+
+    // socket.on('disconnect', () => {
+    //   socket.broadcast.emit('userStatusChanged', { userId: socket.id, status: 'offline' });
+    // });
+
+
+  });

@@ -23,36 +23,47 @@ import { ChatState } from "../../context/ChatProvider";
 import { BellIcon, Search2Icon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import ChatLoading from "../miscellaneous/ChatLoading";
-import UserList from "../miscellaneous/UserList/UserList"
-
+import UserList from "../miscellaneous/UserList/UserList";
+import NotificationBadge from "react-notification-badge";
+import { Effect } from "react-notification-badge";
 
 const MyChat = () => {
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
   const [DrawerCategory, setDrawerCategory] = useState("");
-  const { User,CurrentUserChat, setCurrentUserChat,setSelectedChat,setFetchAllUsers,SelectedChat,Fetch,setFetch} = ChatState();
-  const [Loading, setLoading] = useState(false)
+  const {
+    User,
+    CurrentUserChat,
+    setCurrentUserChat,
+    setSelectedChat,
+    setFetchAllUsers,
+    SelectedChat,
+    Fetch,
+    notification,
+    setnotification
+  } = ChatState();
+  const [Loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
-  
+
   const handleOpenDrawer = () => {
     setisOpenDrawer(true);
   };
   const handleCloseDrawer = () => {
     setisOpenDrawer(false);
   };
-  const profileHandler = () =>{
+  const profileHandler = () => {
     setDrawerCategory("Profile");
     handleOpenDrawer();
-  }
-  const searchHandler = () =>{
+  };
+  const searchHandler = () => {
     setDrawerCategory("Search");
     handleOpenDrawer();
-  }
-  const groupHandler = async()=>{
+  };
+  const groupHandler = async () => {
     setDrawerCategory("Group");
     try {
       const response = await fetch("/api/user/fetchalluser", {
-        method: 'GET',
+        method: "GET",
         headers: {
           Authorization: `Bearer ${User.token}`,
         },
@@ -65,16 +76,15 @@ const MyChat = () => {
       const data = await response.json();
       // console.log(data);
       setFetchAllUsers(data);
-      
     } catch (error) {
       // Handle error here
       console.error(error);
     }
     handleOpenDrawer();
-  }
+  };
 
-  const logoutHandler = ()=>{
-    setSelectedChat()
+  const logoutHandler = () => {
+    setSelectedChat();
     localStorage.removeItem("userInfo");
     navigate("/");
     toast({
@@ -84,19 +94,22 @@ const MyChat = () => {
       isClosable: true,
       position: "top",
     });
-  }
-  const accessChat = (chat)=>{
-    setSelectedChat(chat)
-    console.log(SelectedChat);
+  };
 
-  }
  
+  
+  const accessChat = (chat) => {
+    setSelectedChat(chat);
+    setnotification(notification.filter((n)=> n.chat._id !== chat._id));
+    // console.log(SelectedChat);
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/chat", {
-          method: 'GET',
+          method: "GET",
           headers: {
             Authorization: `Bearer ${User.token}`,
           },
@@ -110,7 +123,6 @@ const MyChat = () => {
         console.log(data);
         setLoading(false);
         setCurrentUserChat(data);
-        
       } catch (error) {
         // Handle error here
         console.error(error);
@@ -123,9 +135,8 @@ const MyChat = () => {
     return () => {
       // Cancel any ongoing requests here
     };
-    
-  }, [Fetch])
-  
+  }, [Fetch]);
+
   return (
     <>
       <Flex
@@ -159,16 +170,18 @@ const MyChat = () => {
             ></Search2Icon>
           </Tooltip>
           <Tooltip label="Create New Group" hasArrow placement="bottom">
-            <Square cursor={"pointer"} 
-              onClick={groupHandler}
-            >
-              <i class="fa-solid fa-user-group"  style={{ color: "white" }}></i>
+            <Square cursor={"pointer"} onClick={groupHandler}>
+              <i class="fa-solid fa-user-group" style={{ color: "white" }}></i>
             </Square>
           </Tooltip>
 
           <Menu>
             <Tooltip label="Notification" hasArrow placement="bottom">
               <MenuButton>
+                <NotificationBadge
+                  count={notification.length}
+                  effect={Effect.SCALE}
+                />
                 <BellIcon fontSize={"2xl"} color={"white"} />
               </MenuButton>
             </Tooltip>
@@ -191,26 +204,25 @@ const MyChat = () => {
         ></SideDrawer>
       </Flex>
       <Box pt={1} className="searchChats" h={"89%"} w={"100%"}>
-                  {
-                  Loading == true ? (
-                    <ChatLoading />
-                  ) :   // console.log(CurrentUserChat))
-                  (CurrentUserChat.length === 0 ? (
-                    <Center h={"100%"} color={"blackAlpha.600"}>
-                      Create or make new chats...
-                    </Center>
-                  ) : 
-                  (CurrentUserChat?.map((chat) => {
-                    return (
-                      <UserList
-                        key={chat._id}
-                        chat={chat}
-                        handleClick={() => accessChat(chat)}
-                      />
-                    );
-                  }))
-                  )}
-                </Box>
+        {Loading == true ? (
+          <ChatLoading />
+        ) : // console.log(CurrentUserChat))
+        CurrentUserChat.length === 0 ? (
+          <Center h={"100%"} color={"blackAlpha.600"}>
+            Create or make new chats...
+          </Center>
+        ) : (
+          CurrentUserChat?.map((chat) => {
+            return (
+              <UserList
+                key={chat._id}
+                chat={chat}
+                handleClick={() => accessChat(chat)}
+              />
+            );
+          })
+        )}
+      </Box>
     </>
   );
 };

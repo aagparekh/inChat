@@ -1,18 +1,48 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./ChatBox.css";
 import { ChatState } from "../../context/ChatProvider";
-import { getSenderName } from "../../config/ChatSender";
+// import { getSenderName } from "../../config/ChatSender";
 import { Box, Center, Flex, Square, Text } from "@chakra-ui/react";
 // import { ChatIcon } from "@chakra-ui/icons";
 import SingleChat from "../miscellaneous/SingleChat/SingleChat";
+import io from "socket.io-client"
+
+const ENDPOINT = "http://localhost:5000";
+let socket,SelectedChatCompare;
+
 const ChatBox = () => {
-  const {SelectedChat} = ChatState();
+  const {SelectedChat,Messages, setMessages,notification, setnotification,setFetch,Fetch,User} = ChatState();
   // console.log(SelectedChat?.users);
-  // console.log(SelectedChat);
+  console.log(SelectedChat);
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup",User);
+  }, [])
+  useEffect(() => {
+    socket.on("message recevied",(newMessageReceived)=>{
+      console.log(SelectedChat);
+     if(!SelectedChatCompare || SelectedChatCompare._id !== newMessageReceived.chat._id) {
+       if(!notification.includes(newMessageReceived)){
+         setnotification([newMessageReceived,...notification]);
+         setFetch(!Fetch);
+       }
+     }
+     else{
+       setMessages([...Messages,newMessageReceived]);
+     }
+      console.log(newMessageReceived);
+    }) 
+  
+   })
+   useEffect(() => {
+     SelectedChatCompare = SelectedChat;
+   }, [SelectedChat])
+   
+   console.log(notification);
   return (
     <>
       {SelectedChat ? (
-        <SingleChat></SingleChat>
+        <SingleChat socket={socket}></SingleChat>
       ) : (
         <Flex
           h={"100%"}
