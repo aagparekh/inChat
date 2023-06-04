@@ -1,7 +1,7 @@
 const expressAsyncHandler = require("express-async-handler");
 const Message = require("../models/messageModel");
 const Chat = require("../models/chatModel");
-// const User = require("../models/userModel");
+const User = require("../models/userModel");
 
 
 
@@ -21,10 +21,10 @@ const sendMessage = expressAsyncHandler(async(req,res)=>{
         let message = await Message.create(newMessage);
         message = await message.populate("sender","name pic");
         message = await message.populate("chat");
-        message = await Chat.populate(message,{path: "chat.users", select: "name pic email"});
+        message = await User.populate(message,{path: "chat.users", select: "name pic email"});
 
-        await Chat.findByIdAndUpdate(chatId,{
-            lastesMessage : message
+        await Chat.findByIdAndUpdate(req.body.chatId,{
+            latestMessage : message,
         });
        return res.status(200).json(message)
     } catch (error) {

@@ -2,7 +2,6 @@ import {
   Avatar,
   Box,
   Circle,
-  Flex,
   HStack,
   Spacer,
   Text,
@@ -10,12 +9,12 @@ import {
 import React, { useEffect } from "react";
 import { getSenderName, getSenderPic } from "../../../config/ChatSender";
 import { ChatState } from "../../../context/ChatProvider";
-import { LayoutGroup } from "framer-motion";
+// import { LayoutGroup } from "framer-motion";
 
 const UserList = ({ chat, handleClick }) => {
   const { User, SelectedChat, notification} = ChatState();
   // console.log(chat.isGroupChat);
-  // console.log(SelectedChat);
+  console.log(chat);
   const getCount = () => {
     let count = 0;
     if (notification.length === 0) return count;
@@ -31,7 +30,7 @@ const UserList = ({ chat, handleClick }) => {
 
   const count = getCount();
 
-
+  
 
   return (
     <>
@@ -67,7 +66,10 @@ const UserList = ({ chat, handleClick }) => {
                   style={{ color: "#00a884de", marginLeft: "8px" }}
                 ></i>
               </Text>
-              <Text color={"blackAlpha.600"}>Message Yourself</Text>
+              {
+                chat.latestMessage ? <Text color={"blackAlpha.600"} noOfLines={1}>{chat.latestMessage.sender.name === User.name? "~ You"+": "+ chat.latestMessage.content : "~ "+chat.latestMessage.sender.name+": "+ chat.latestMessage.content }</Text>:
+                <Text color={"blackAlpha.600"}>Message Yourself</Text>
+                }
               
               </Box>
               <Spacer/>
@@ -100,7 +102,10 @@ const UserList = ({ chat, handleClick }) => {
                 <Text fontSize={"lg"}>
                   {chat.name ? chat.name : getSenderName(User, chat.users)}
                 </Text>
+                {
+                chat.latestMessage ? <Text color={"blackAlpha.600"}>{chat.latestMessage.content}</Text>:
                 <Text color={"blackAlpha.600"}>Message Yourself</Text>
+                }
               </Box>
               <Spacer />
               {/* {console.log(chat.chatName + count)} */}

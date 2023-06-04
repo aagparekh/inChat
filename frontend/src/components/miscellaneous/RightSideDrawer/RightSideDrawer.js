@@ -82,6 +82,7 @@ const RightSideDrawer = ({ isOpenDrawer, onCloseDrawer, drawerCat }) => {
     setTimeout(() => {
       setSpinnerLoading(false);
     }, 4000);
+    
     setCurrentUserChat(CurrentUserChat.filter((chat) => chat._id !== data._id));
     setSelectedChat();
     toast({

@@ -3,18 +3,15 @@ import "./MyChat.css";
 import {
   Avatar,
   Box,
-  Button,
   ButtonGroup,
   Center,
   Flex,
-  Heading,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Spacer,
   Square,
-  Text,
   Tooltip,
   useToast,
 } from "@chakra-ui/react";
@@ -36,7 +33,6 @@ const MyChat = () => {
     setCurrentUserChat,
     setSelectedChat,
     setFetchAllUsers,
-    SelectedChat,
     Fetch,
     notification,
     setnotification

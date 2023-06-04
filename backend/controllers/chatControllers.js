@@ -26,7 +26,7 @@ const accessChat = expressAsyncHandler(async (req, res) => {
     .populate("latestMessage");
 
   isChat = await User.populate(isChat, {
-    path: "lastestMessage.sender",
+    path: "latestMessage.sender",
     select: "name email pic",
   });
   // console.log(isChat[0]);
@@ -67,7 +67,7 @@ const fetchChats = expressAsyncHandler(async (req, res) => {
       .sort({ updatedAt: -1 })
       .then(async (results) => {
         results = await User.populate(results, {
-          path: "lastestMessage.sender",
+          path: "latestMessage.sender",
           select: "name email pic",
         });
         
