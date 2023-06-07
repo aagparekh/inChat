@@ -21,29 +21,30 @@ import ScrollableChat from "../../ScrollableChat/ScrollableChat";
 // let SelectedChatCompare;
 
 
-const SingleChat = ({socket}) => {
-  const { User, SelectedChat,Fetch,setFetch,CurrentUserChat,Messages, setMessages } = ChatState();
+const SingleChat = ({socket,socketConnected}) => {
+  const { User, SelectedChat,Fetch,setFetch,CurrentUserChat,Messages,setMessages,setOnlineUsers,OnlineUsers} = ChatState();
   const [SpinnerLoading, setSpinnerLoading] = useState(false);
   const [newMessage, setnewMessage] = useState();
   const containerRef = useRef(null);
-  const [socketConnected, setsocketConnected] = useState(false);
   const [Typing, setTyping] = useState(false);
   const [isTyping, setisTyping] = useState(false);
   const [TyperName, setTyperName] = useState('')
-  const [onlineName, setOnlineName] = useState('');
+  // const [onlineName, setOnlineName] = useState('');
 
 
   useEffect(() => {
     // console.log(socket);
-    
-    socket.on('connected',()=>{
-      setsocketConnected(true)})
     socket.on("typing", (name)=>{ 
       setisTyping(true); 
-      setTyperName(name)
+      setTyperName(name);
+      console.log(OnlineUsers.includes(name));
+      if(OnlineUsers.includes(name) === false)
+      {
+        setOnlineUsers([...OnlineUsers,name]);
+      }
      });
     socket.on("stop typing", ()=>setisTyping(false))
-    socket.on("online status",(name)=>setOnlineName(name))
+    // socket.on("online status",(name)=>setOnlineName(name))
     }, [])
     
     // console.log(TyperName);
@@ -86,9 +87,6 @@ const SingleChat = ({socket}) => {
   }
   useEffect(() => {
     fetchAllMessage();
-
-    
-    // socket.on("online status",(list_names)=>setOnlineName(list_names))
     return () => {
     }
   }, [SelectedChat])
@@ -140,7 +138,7 @@ const SingleChat = ({socket}) => {
 
     if(!Typing){
       setTyping(true);
-      // console.log(User.name);
+      console.log(User.name);
       socket.emit("typing",SelectedChat._id,User.name);
     }
     let lastTypingTime = new Date().getTime();
@@ -158,7 +156,7 @@ const SingleChat = ({socket}) => {
   return (
     <>
       <div id="ChatBox-header">
-        {SelectedChat ? <ChatHeader isTyping = {isTyping} name = {TyperName} onlineName= {onlineName}></ChatHeader> : null}
+        {SelectedChat ? <ChatHeader isTyping = {isTyping} name = {TyperName}></ChatHeader> : null}
       </div>
       <Box
         h={"80.2%"}

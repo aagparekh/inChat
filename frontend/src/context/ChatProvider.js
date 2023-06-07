@@ -11,6 +11,7 @@ const ChatProvider = ({ children }) => {
   const [Fetch, setFetch] = useState(false);
   const [notification, setnotification] = useState([]);
   const [Messages, setMessages] = useState([]);
+  const [OnlineUsers, setOnlineUsers] = useState([])
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -39,7 +40,9 @@ const ChatProvider = ({ children }) => {
         notification, 
         setnotification,
         Messages, 
-        setMessages
+        setMessages,
+        OnlineUsers, 
+        setOnlineUsers
       }}
     >
       {children}

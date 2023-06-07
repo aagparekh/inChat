@@ -8,11 +8,12 @@ import {
 import { ChatState } from "../../../context/ChatProvider";
 import RightSideDrawer from "../RightSideDrawer/RightSideDrawer";
 
-const ChatHeader = ({ isTyping, name, onlineName}) => {
-  const { User, SelectedChat } = ChatState();
+const ChatHeader = ({ isTyping, name}) => {
+  const { User, SelectedChat,OnlineUsers } = ChatState();
   const [DrawerCategory, setDrawerCategory] = useState("");
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
  
+  console.log(OnlineUsers);
   const handleOpenDrawer = () => {
     setisOpenDrawer(true);
   };
@@ -100,7 +101,7 @@ const ChatHeader = ({ isTyping, name, onlineName}) => {
                   <Text fontSize={"15px"} color={"white"}>
                     Typing...
                   </Text>
-                ) : onlineName.includes(getSenderName(User, SelectedChat?.users))? (
+                ) : OnlineUsers.includes(getSenderName(User, SelectedChat?.users))? (
                   <Text fontSize={"15px"} color={"white"}>
                     online
                   </Text>

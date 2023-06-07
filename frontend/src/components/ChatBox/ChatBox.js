@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./ChatBox.css";
 import { ChatState } from "../../context/ChatProvider";
 // import { getSenderName } from "../../config/ChatSender";
@@ -11,12 +11,19 @@ const ENDPOINT = "http://localhost:5000";
 let socket,SelectedChatCompare;
 
 const ChatBox = () => {
-  const {SelectedChat,Messages, setMessages,notification, setnotification,setFetch,Fetch,User} = ChatState();
+  const {SelectedChat,Messages, setMessages,notification, setnotification,setFetch,Fetch,OnlineUsers, setOnlineUsers,User} = ChatState();
+  const [socketConnected, setsocketConnected] = useState(false);
+  
   // console.log(SelectedChat?.users);
-  console.log(SelectedChat);
+
+  // console.log(SelectedChat);
+
   useEffect(() => {
     socket = io(ENDPOINT);
     socket.emit("setup",User);
+    socket.on('connected',()=>{
+      setsocketConnected(true) 
+    })
   }, [])
   useEffect(() => {
     socket.on("message recevied",(newMessageReceived)=>{
@@ -37,12 +44,35 @@ const ChatBox = () => {
    useEffect(() => {
      SelectedChatCompare = SelectedChat;
    }, [SelectedChat])
+
+
+   useEffect(() => {
+    // Listen for the custom event indicating a user's online status has changed
+    socket.on('userStatusChanged', ({ user, status }) => {
+      // console.log(userId + status);
+      if (status === 'online') {
+        setOnlineUsers((prevOnlineUsers) => [...prevOnlineUsers, user.name]);
+      } else if (status === 'offline') {
+        setOnlineUsers((prevOnlineUsers) => prevOnlineUsers.filter((u) => u?._id !== user?._id ));
+      }
+
+      // socket.emit('userConnected', User);
+    });
+
+    // Emit an event to notify the server about the user's connection
+    socket.emit('userConnected', User);
+
+    // Clean up socket connection on component unmount
+    return () => {
+      socket.disconnect();
+    };
+  },[]);
    
-   console.log(notification);
+  //  console.log(notification);
   return (
     <>
       {SelectedChat ? (
-        <SingleChat socket={socket}></SingleChat>
+        <SingleChat socket={socket} socketConnected = {socketConnected}></SingleChat>
       ) : (
         <Flex
           h={"100%"}

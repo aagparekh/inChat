@@ -52,10 +52,10 @@ const io = require('socket.io')(server,{
 io.on("connection",(socket)=>{
     console.log(`Connected to Socket.io`);
     
-    // socket.on('userConnected', (userId) => {
-    //   socket.broadcast.emit('userStatusChanged', { userId, status: 'online' });
-    //   console.log(userId);
-    // });
+    socket.on('userConnected', (user) => {
+      socket.broadcast.emit('userStatusChanged', {  user, status: 'online' });
+      // console.log(userId);
+    });
     
     socket.on("setup",(userData)=>{
         socket.join(userData._id);
@@ -66,12 +66,13 @@ io.on("connection",(socket)=>{
     socket.on("join room", (room,name)=>{
         socket.join(room)
         // console.log(name);
-        socket.to(room).emit("online status",name);
+        // socket.to(room).emit("online status",name);
         joinedRoom = room
         console.log("User Join room: "+room);
     })
 
     socket.on("typing",(room,name)=> {
+      console.log(name);
       socket.to(room).emit("typing",name);
     
     })
@@ -90,9 +91,9 @@ io.on("connection",(socket)=>{
         });
     })
 
-    // socket.on('disconnect', () => {
-    //   socket.broadcast.emit('userStatusChanged', { userId: socket.id, status: 'offline' });
-    // });
+    socket.on('disconnect', () => {
+      socket.broadcast.emit('userStatusChanged', { userId: socket.id, status: 'offline' });
+    });
 
 
   });

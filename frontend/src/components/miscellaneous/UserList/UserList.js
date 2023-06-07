@@ -14,7 +14,7 @@ import { ChatState } from "../../../context/ChatProvider";
 const UserList = ({ chat, handleClick }) => {
   const { User, SelectedChat, notification} = ChatState();
   // console.log(chat.isGroupChat);
-  console.log(chat);
+  // console.log(chat);
   const getCount = () => {
     let count = 0;
     if (notification.length === 0) return count;
