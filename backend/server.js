@@ -64,15 +64,25 @@ io.on("connection",(socket)=>{
     })
 
     socket.on("join room", (room,name)=>{
+      if (joinedRoom) {
+        socket.leave(joinedRoom);
+        console.log("User left room: " + joinedRoom);
+      }
         socket.join(room)
-        // console.log(name);
-        // socket.to(room).emit("online status",name);
+        
+        // const clientsInRoom = io.sockets.adapter.rooms.get(room);
+        // console.log(`room ${room}: ${clientsInRoom}`);
+        // if (clientsInRoom) {
+        //   const numClients = clientsInRoom.size;
+        //   console.log(`Number of clients in room ${room}: ${numClients}`);
+        // }
         joinedRoom = room
         console.log("User Join room: "+room);
     })
 
     socket.on("typing",(room,name)=> {
-      console.log(name);
+     console.log(room);
+    
       socket.to(room).emit("typing",name);
     
     })

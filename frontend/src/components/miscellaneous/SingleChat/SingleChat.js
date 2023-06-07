@@ -34,10 +34,11 @@ const SingleChat = ({socket,socketConnected}) => {
 
   useEffect(() => {
     // console.log(socket);
-    socket.on("typing", (name)=>{ 
+    socket.on("typing", (name)=>{
+      console.log(name);
       setisTyping(true); 
       setTyperName(name);
-      console.log(OnlineUsers.includes(name));
+      // console.log(OnlineUsers.includes(name));
       if(OnlineUsers.includes(name) === false)
       {
         setOnlineUsers([...OnlineUsers,name]);
